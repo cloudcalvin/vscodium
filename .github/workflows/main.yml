@@ -1,0 +1,82 @@
+# This is a basic workflow that is manually triggered
+
+name: Create Binary Release
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on: 
+  schedule:
+  - cron: '0 13 * * *' # 13:00 Daily
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      name:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'Create a new binary'
+        # Default value if no value is explicitly provided
+        default: 'World'
+        # Input has to be provided for the workflow to run
+        required: true
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+      
+    - name: setup node
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12
+      
+    - name: before_install
+      run: |
+        curl -o- -L https://yarnpkg.com/install.sh | bash
+        export PATH="$HOME/.yarn/bin:$PATH"
+        .install_deps.sh
+        .get_repo.sh
+        .check_tags.sh
+        
+    - name: script
+      env:
+         SHOULD_BUILD: "yes"
+         BUILDARCH: x64
+      run: |
+        sed 's/https:\/\/open-vsx\.org\/vscode\/gallery/https:\/\/marketplace\.visualstudio\.com\/_apis\/public\/gallery/g' product.json
+        sed 's/https:\/\/open-vsx\.org\/vscode\/items/https:\/\/marketplace\.visualstudio\.com\/items/g' product.json
+        sed 's/https:\/\/open-vsx\.org/https:\/\/marketplace\.visualstudio\.com/g' product.json
+        ./build.sh
+      
+    - name: before_deploy    
+      run: |
+        ./sign_mac_app.sh
+        ./create_zip.sh
+        ./create_dmg.sh
+        ./sum.sh
+        
+    - name: deploy
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        tag_name: $LATEST_MS_TAG
+        prerelease: false
+        draft: false
+        files: |
+          ./*.sha256
+          ./*.zip
+          ./*.tar.gz
+          ./*.dmg
+          ./*.deb
+          ./*.rpm
+          ./*.AppImage
+          ./*.AppImage.zsync
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+     
+    - name: after_deploy
+      run: ./update_version.sh
