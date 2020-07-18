@@ -41,6 +41,7 @@ jobs:
         .install_deps.sh
         .get_repo.sh
         .check_tags.sh
+      working-directory: ./
         
     - name: script
       env:
