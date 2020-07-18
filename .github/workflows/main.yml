@@ -45,13 +45,15 @@ jobs:
         sed 's/https:\/\/open-vsx\.org\/vscode\/gallery/https:\/\/marketplace\.visualstudio\.com\/_apis\/public\/gallery/g' ./vscode/product.json
         sed 's/https:\/\/open-vsx\.org\/vscode\/items/https:\/\/marketplace\.visualstudio\.com\/items/g' ./vscode/product.json
         sed 's/https:\/\/open-vsx\.org/https:\/\/marketplace\.visualstudio\.com/g' ./vscode/product.json
+        cat *.sh | awk '/export/ { print $2 }' | awk -F "=" 'NF>=2{ print $1 }' | awk '!x[$0]++' | awk '!/[a-z]/ { print }' | awk '{ printf "::set-env name=%s::$%s\n", $1, $1 }' | envsubst | awk !'/::$/'
       shell: bash
       
     - name: script
       env:
          SHOULD_BUILD: "yes"
          BUILDARCH: x64
-      run: bash ./build.sh
+      run: |
+        bash ./build.sh
       
     - name: before_deploy    
       run: |
