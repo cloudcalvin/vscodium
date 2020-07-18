@@ -14,7 +14,7 @@ on:
         # Friendly description to be shown in the UI instead of 'name'
         description: 'Create a new binary'
         # Default value if no value is explicitly provided
-        default: 'World'
+        default: 'vscodium-bin'
         # Input has to be provided for the workflow to run
         required: true
 
@@ -39,9 +39,10 @@ jobs:
         PATH: "$HOME/.yarn/bin:$PATH"
       run: |
         curl -o- -L https://yarnpkg.com/install.sh | bash
-        bash -c ".install_deps.sh"
-        bash -c ".get_repo.sh"
-        bash -c ".check_tags.sh"
+        echo "::add-path::$HOME/.yarn/bin"
+        .install_deps.sh
+        .get_repo.sh
+        .check_tags.sh
         
     - name: script
       env:
