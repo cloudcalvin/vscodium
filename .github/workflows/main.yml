@@ -38,9 +38,9 @@ jobs:
       run: |
         curl -o- -L https://yarnpkg.com/install.sh | bash
         echo "::add-path::$HOME/.yarn/bin"
-        .install_deps.sh
-        .get_repo.sh
-        .check_tags.sh
+        sh .install_deps.sh
+        sh .get_repo.sh
+        sh .check_tags.sh
       working-directory: ./
         
     - name: script
@@ -51,14 +51,14 @@ jobs:
         sed 's/https:\/\/open-vsx\.org\/vscode\/gallery/https:\/\/marketplace\.visualstudio\.com\/_apis\/public\/gallery/g' product.json
         sed 's/https:\/\/open-vsx\.org\/vscode\/items/https:\/\/marketplace\.visualstudio\.com\/items/g' product.json
         sed 's/https:\/\/open-vsx\.org/https:\/\/marketplace\.visualstudio\.com/g' product.json
-        ./build.sh
+        sh ./build.sh
       
     - name: before_deploy    
       run: |
-        ./sign_mac_app.sh
-        ./create_zip.sh
-        ./create_dmg.sh
-        ./sum.sh
+        sh ./sign_mac_app.sh
+        sh ./create_zip.sh
+        sh ./create_dmg.sh
+        sh ./sum.sh
         
     - name: deploy
       uses: softprops/action-gh-release@v1
