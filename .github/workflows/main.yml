@@ -44,16 +44,16 @@ jobs:
         sh ./install_deps.sh
         sh ./get_repo.sh
         sh ./check_tags.sh
-        
+        sed 's/https:\/\/open-vsx\.org\/vscode\/gallery/https:\/\/marketplace\.visualstudio\.com\/_apis\/public\/gallery/g' ./vscode/product.json
+        sed 's/https:\/\/open-vsx\.org\/vscode\/items/https:\/\/marketplace\.visualstudio\.com\/items/g' ./vscode/product.json
+        sed 's/https:\/\/open-vsx\.org/https:\/\/marketplace\.visualstudio\.com/g' ./vscode/product.json
+      shell: bash
+      
     - name: script
       env:
          SHOULD_BUILD: "yes"
          BUILDARCH: x64
-      run: |
-        sed 's/https:\/\/open-vsx\.org\/vscode\/gallery/https:\/\/marketplace\.visualstudio\.com\/_apis\/public\/gallery/g' product.json
-        sed 's/https:\/\/open-vsx\.org\/vscode\/items/https:\/\/marketplace\.visualstudio\.com\/items/g' product.json
-        sed 's/https:\/\/open-vsx\.org/https:\/\/marketplace\.visualstudio\.com/g' product.json
-        sh ./build.sh
+      run: sh ./build.sh
       
     - name: before_deploy    
       run: |
@@ -61,7 +61,8 @@ jobs:
         sh ./create_zip.sh
         sh ./create_dmg.sh
         sh ./sum.sh
-        
+      shell: bash
+      
     - name: deploy
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
